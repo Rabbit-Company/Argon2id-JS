@@ -7,9 +7,11 @@ document.getElementById("start").addEventListener('click', () => {
 	let m = document.getElementById('m').value;
 	let i = document.getElementById('i').value;
 	let l = document.getElementById('l').value;
+	let secret = document.getElementById('secret').value;
+	let associatedData = document.getElementById('associatedData').value;
 
 	let timerStart = Date.now();
-	let hashEncoded = Argon2id.hashEncoded(message, salt, i, m, p, l);
+	let hashEncoded = Argon2id.hashEncoded(message, salt, i, m, p, l, secret, associatedData);
 	let hashHex = Argon2id.hashDecode(hashEncoded);
 	let timerEnd = calcT(timerStart);
 	document.getElementById('hash').innerHTML = "<b>Hash:</b> " + hashHex + "<br/><b>Hash Encoded:</b> " + hashEncoded;

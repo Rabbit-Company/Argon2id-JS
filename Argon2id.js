@@ -463,4 +463,24 @@ class Argon2id{
 		let output = a2id.Argon2Operation(p, l, m, t, 0x13, 2, message, salt, secret, associatedData);
 		return "$argon2id$v=19$m="+m+",t="+t+",p="+p+"$"+btoa(salt).replaceAll("=", "")+"$"+a2id.hexToBase64(a2id.toHex(output)).replaceAll("=", "");
 	}
+
+	static verify(hashEncoded, message, secret = "", associatedData = ""){
+		let hea = hashEncoded.split('$');
+		if(hea.length != 6) return false;
+		if(hea[1] != "argon2id") return false;
+		if(hea[2] != "v=19") return false;
+
+		let hpa = hea[3].split(',');
+		if(hpa.length != 3) return false;
+
+		let m = hpa[0].split('=')[1];
+		let t = hpa[1].split('=')[1];
+		let p = hpa[2].split('=')[1];
+		let salt = atob(hea[4]);
+		let digest = Argon2id.hashDecode(hashEncoded);
+
+		let hash = Argon2id.hash(message, salt, t, m, p, digest.length/2, secret, associatedData);
+		if(digest == hash) return true;
+		return false;
+	}
 }
