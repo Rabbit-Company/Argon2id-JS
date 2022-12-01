@@ -44,4 +44,8 @@ Argon2id.hashEncoded("message", Argon2id.randomSalt());
 Argon2id.hashEncoded("message", Argon2id.randomSalt(), 2, 32, 3, 32);
 // This library also support Secret and Associated Data
 Argon2id.hashEncoded("message", Argon2id.randomSalt(), 2, 32, 3, 32, "Secret", "Associated Data");
+
+// To validate the message you can use verify function.
+// This function accept hashEncoded, message, secret and associated data.
+Argon2id.verify("$argon2id$v=19$m=32,t=2,p=3$dW9UeUphNWNOMzRBMGtYMw$Cxao0qDvUJFAasxuFpojONVbdi6Est3RyyRBtyHRfrI", "test");
 ```
