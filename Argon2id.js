@@ -446,7 +446,7 @@ class Argon2id{
 		return salt.join("");
 	}
 
-	static hash(message, salt = "", t=3, m=32, p=3, l=32, secret = "", associatedData = ""){
+	static hash(message, salt = Argon2id.randomSalt(), t=2, m=32, p=3, l=32, secret = "", associatedData = ""){
 		let a2id = new Argon2id();
 		let output = a2id.Argon2Operation(p, l, m, t, 0x13, 2, message, salt, secret, associatedData);
 		return a2id.toHex(output);
@@ -458,7 +458,7 @@ class Argon2id{
 		return a2id.base64ToHex(digest).toLowerCase();
 	}
 
-	static hashEncoded(message, salt = "", t=3, m=32, p=3, l=32, secret = "", associatedData = ""){
+	static hashEncoded(message, salt = Argon2id.randomSalt(), t=2, m=32, p=3, l=32, secret = "", associatedData = ""){
 		let a2id = new Argon2id();
 		let output = a2id.Argon2Operation(p, l, m, t, 0x13, 2, message, salt, secret, associatedData);
 		return "$argon2id$v=19$m="+m+",t="+t+",p="+p+"$"+btoa(salt).replaceAll("=", "")+"$"+a2id.hexToBase64(a2id.toHex(output)).replaceAll("=", "");
