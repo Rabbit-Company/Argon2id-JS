@@ -16,9 +16,9 @@ Argon2id implementation in a plain JavaScript.
   Parameters:
   1. Message (String)
   2. Salt (String) <>
-	3. Iterations (Int) <2> (Min = 1)
-	4. Memory Cost (Int) <32> (Min = 12)
-	5. Parallelism Factor (Int) <3> (Min = 1)
+  3. Iterations (Int) <2> (Min = 1)
+  4. Memory Cost (Int) <32> (Min = 12)
+  5. Parallelism Factor (Int) <3> (Min = 1)
   6. Length (Int) <32> (Min = 1)
   7. Secret (String) <>
   8. Associated Data (String) <>
