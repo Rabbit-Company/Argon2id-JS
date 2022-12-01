@@ -7,19 +7,24 @@
 	</head>
 	<body>
 		<h1><a href="https://github.com/Rabbit-Company/Argon2id-JS" target="_blank">Argon2id-JS</a></h1>
-		<textarea id="message" rows="10" cols="50"></textarea></br></br>
+		<textarea id="message" rows="5" cols="50"></textarea></br></br>
 		<label>Salt: </label><input id="salt" type="text" placeholder="Salt"><br/>
 		<label>Parallelism Factor: </label><input id="p" type="number" min="1" max="16" value="3" placeholder="p"><br/>
 		<label>Memory Cost: </label><input id="m" type="number" min="32" max="1024" value="32" placeholder="m"><br/>
 		<label>Iterations: </label><input id="i" type="number" min="1" max="100" value="2" placeholder="t"><br/>
 		<label>Hash Length: </label><input id="l" type="number" min="1" max="64" value="32" placeholder="l"><br/><br/>
-
 		<label>Secret: </label><input id="secret" type="text" placeholder="Secret"><br/>
 		<label>Associated Data: </label><input id="associatedData" type="text" placeholder="Associated Data"><br/></br>
-
 		<button id="start">Hash</button>
-
 		<p id="hash"></p>
+
+		<h1>Validator</h1>
+		<textarea id="message2" rows="5" cols="50"></textarea></br></br>
+		<label>Secret: </label><input id="secret2" type="text" placeholder="Secret"><br/>
+		<label>Associated Data: </label><input id="associatedData2" type="text" placeholder="Associated Data"><br/></br>
+		<label>Hash Encoded: </label><input id="hashEncoded" type="text" placeholder="$argon2id$v=19$m=32,t=2,p=3$VjI0cFYyYTdtVzM1NDRkaA$7oQ9QNSpyrk/lwi3Gfq6q+7XPNiD3UcejGKz9koRLGk"><br/></br>
+		<button id="verify">Validate</button>
+		<p id="validate"></p>
 
 		<h1>Performance</h1>
 		<p id="perf"></p>
