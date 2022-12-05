@@ -6,6 +6,9 @@ Argon2id implementation in a plain JavaScript.
 
 ### 1. Import library
 ```html
+<!-- 1. Include worker to increase performance (Utilize multi-threading). -->
+<script src="Argon2idWorker.min.js"></script>
+<!-- 2. Include Argon2id library. -->
 <script src="Argon2id.min.js"></script>
 ```
 
@@ -27,25 +30,40 @@ Argon2id implementation in a plain JavaScript.
 
 // Generate hash from the provided message
 // If you don't provide salt, it will be auto generated
-await Argon2id.hash("message");
+Argon2id.hash("message").then(hash => {
+	console.log("Hash: " + hash);
+});
 
 // Generate Encoded hash from the provided message
 // Both hash and hashEncoded functions accept the same parameters
-await Argon2id.hashEncoded("message");
+Argon2id.hashEncoded("message").then(hashEncoded => {
+	console.log("Encoded Hash: " + hashEncoded);
+});
 // To get hash from hashEncoded function you can use function called hashDecode
-Argon2id.hashDecode("$argon2id$v=19$m=32,t=3,p=3$dGVzdHRlc3R0ZXN0dGVzdA$YJjtURjUHWPGnu+B5BTdfpebyJlWEfzfbBdkO7SLquM");
+Argon2id.hashDecode("$argon2id$v=19$m=32,t=2,p=3$MjZZaFJwRjZ2N3pyUzU2ag$EzMK1uIBhPZQV8XPsjTOnw");
 
 // Generate hash from the provided message and salt
-await Argon2id.hash("message", "salt");
+Argon2id.hash("message", "salt").then(hash => {
+	console.log("Hash: " + hash);
+});
 // To generate random secure salt use randomSalt function
-await Argon2id.hashEncoded("message", Argon2id.randomSalt());
+Argon2id.hashEncoded("message", Argon2id.randomSalt()).then(hashEncoded => {
+	console.log("Encoded Hash: " + hashEncoded);
+});
 
 // Generate hash from the provided message, salt, iterations, memory cost, parallelism factor and hash length
-await Argon2id.hashEncoded("message", Argon2id.randomSalt(), 2, 32, 3, 32);
+Argon2id.hashEncoded("message", Argon2id.randomSalt(), 2, 32, 3, 32).then(hashEncoded => {
+	console.log("Encoded Hash: " + hashEncoded);
+});
 // This library also support Secret and Associated Data
-await Argon2id.hashEncoded("message", Argon2id.randomSalt(), 2, 32, 3, 32, "Secret", "Associated Data");
+Argon2id.hash("message", "salt", 2, 32, 3, 32, "Secret", "Associated Data").then(hash => {
+	console.log("Hash: " + hash);
+});
 
 // To validate the message you can use verify function.
 // This function accept hashEncoded, message, secret and associated data.
-await Argon2id.verify("$argon2id$v=19$m=32,t=2,p=3$dW9UeUphNWNOMzRBMGtYMw$Cxao0qDvUJFAasxuFpojONVbdi6Est3RyyRBtyHRfrI", "test");
+Argon2id.verify("$argon2id$v=19$m=32,t=2,p=3$MjZZaFJwRjZ2N3pyUzU2ag$EzMK1uIBhPZQV8XPsjTOnw", "test").then(match => {
+	if(match) console.log("Message is valid.");
+	if(!match) console.log("Message is not valid.");
+});
 ```

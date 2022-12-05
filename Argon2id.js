@@ -1,5 +1,5 @@
 /*
-Argon2id-JS v1.0.0
+Argon2id-JS v1.1.0
 https://github.com/Rabbit-Company/Argon2id-JS
 License: GPL-3.0
 */
