@@ -5,6 +5,7 @@ License: GPL-3.0
 */
 
 class Argon2id{
+	static memo = {};
 	construtor(){
 		this.mm = NaN;
 		this.H_0 = NaN;
@@ -50,21 +51,40 @@ class Argon2id{
 		if(i == 1) return this.Uint8ArrayToBigInt(B.slice(4,8));
 	}
 
-	NumberToUint8Array = number => {
-		var array = [], bigint = BigInt(number);
-		for(let i = 0; i < Math.ceil(Math.floor(Math.log2(new Number(number)) + 1) / 8); i++)
-			array.unshift(new Number((bigint >> BigInt(8 * i)) & 255n));
+	NumberToUint8Array(bigint) {
+		var array = [];
+		let length = Math.ceil(Math.floor(Math.log2(new Number(bigint)) + 1) / 8);
+		for (let i = 0; i < length; i++) {
+			array.unshift(new Number(bigint & 255n));
+			bigint >>= 8n;
+		}
 		return new Uint8Array(array).reverse();
 	}
 
-	Uint8ArrayToBigInt = Uint8Array => [...Uint8Array].reduce((prev, curr, index) => BigInt(prev) | (BigInt(curr) << BigInt(index * 8)));
-
-	ZERO(P){
-		return new Uint8Array(P).fill(0);
+	Uint8ArrayToBigInt(uint8array) {
+		let result = 0n;
+		for (let i = uint8array.length - 1; i >= 0; i--) {
+			result = BigInt(uint8array[i]) | result << 8n;
+		}
+		return result;
 	}
 
-	Concatenate(a, b, c = ''){
-		return new Uint8Array([ ...a, ...b, ...c ]);
+	ZERO(P) {
+		return new Uint8Array(P);
+	}
+
+	Concatenate(...items) {
+		let length = 0;
+		items.forEach(item => {
+			length += item.length;
+		});
+		const result = new Uint8Array(length);
+		let offset = 0;
+		items.forEach(item => {
+			result.set(item, offset);
+			offset += item.length;
+		});
+		return result;
 	}
 
 	XOR(X, Y){
@@ -225,72 +245,113 @@ class Argon2id{
 	}
 
 	G(X, Y){
-		let R = this.XOR(X,Y);
-		let Q = [];
-		let pp;
-		let rN;
-		let zzz;
+		return new Promise(resolve => {
+			let R = this.XOR(X,Y);
+			let Q = [];
+			let pp;
+			let rN;
+			let zzz;
 
-		for(let index = 0; index < 8; index++){
-			rN = 128*index;
-			pp = this.P(R.slice(rN, rN+16), R.slice(rN+16, rN+32), R.slice(rN+32, rN+48), R.slice(rN+48, rN+64), R.slice(rN+64, rN+80), R.slice(rN+80, rN+96), R.slice(rN+96, rN+112), R.slice(rN+112, rN+128));
-			for(let index = 0; index < pp.length; index++) Q = this.Concatenate(Q, pp[index]);
-		}
+			for(let index = 0; index < 8; index++){
+				rN = 128*index;
+				pp = this.P(R.slice(rN, rN+16), R.slice(rN+16, rN+32), R.slice(rN+32, rN+48), R.slice(rN+48, rN+64), R.slice(rN+64, rN+80), R.slice(rN+80, rN+96), R.slice(rN+96, rN+112), R.slice(rN+112, rN+128));
+				pp.forEach(ppItem => Q.push(...ppItem));
+			}
 
-		let Z = [];
-		for(let index = 0; index < 8; index++){
-			rN = 16*index;
-			pp = this.P(Q.slice(rN, rN+16), Q.slice(rN+128, rN+128+16), Q.slice(rN+256, rN+256+16), Q.slice(rN+384, rN+384+16), Q.slice(rN+512, rN+512+16), Q.slice(rN+640, rN+640+16), Q.slice(rN+768, rN+768+16), Q.slice(rN+896, rN+896+16));
-			for(let index = 0; index < pp.length; index++) Z = this.Concatenate(Z, pp[index]);
-		}
+			let Z = [];
+			for(let index = 0; index < 8; index++){
+				rN = 16*index;
+				pp = this.P(Q.slice(rN, rN+16), Q.slice(rN+128, rN+128+16), Q.slice(rN+256, rN+256+16), Q.slice(rN+384, rN+384+16), Q.slice(rN+512, rN+512+16), Q.slice(rN+640, rN+640+16), Q.slice(rN+768, rN+768+16), Q.slice(rN+896, rN+896+16));
+				pp.forEach(ppItem => Q.push(...ppItem));
+				for(let index = 0; index < pp.length; index++) Z = this.Concatenate(Z, pp[index]);
+			}
 
-		let ZZ = [];
-		for(let index = 0; index < 8; index++){
-			rN = 16*index;
-			zzz = this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(Z.slice(rN, rN+16), Z.slice(rN+128, rN+128+16)), Z.slice(rN+256, rN+256+16)), Z.slice(rN+384, rN+384+16)), Z.slice(rN+512, rN+512+16)), Z.slice(rN+640, rN+640+16)), Z.slice(rN+768, rN+768+16)), Z.slice(rN+896, rN+896+16));
-			ZZ = this.Concatenate(ZZ, zzz);
-		}
+			let ZZ = [];
+			for(let index = 0; index < 8; index++){
+				rN = 16*index;
+				ZZ = this.Concatenate(ZZ, Z.slice(rN, rN+16), Z.slice(rN+128, rN+128+16), Z.slice(rN+256, rN+256+16), Z.slice(rN+384, rN+384+16), Z.slice(rN+512, rN+512+16), Z.slice(rN+640, rN+640+16), Z.slice(rN + 768, rN + 768 + 16), Z.slice(rN + 896, rN + 896 + 16));
+			}
 
-		return this.XOR(ZZ,R);
+			resolve(this.XOR(ZZ, R));
+		});
 	}
 
 	blake2bSetup(out_len, KEY=null){
 		this.context = new Blake2b().blake2bInit(out_len, KEY);
 	}
 
-	Argon2Operation(p, T, m, time_cost, v, y, P, S, K = "", X = ""){
-		this.H_0 = this.EstablishH_0(p, T, m, time_cost, v, y, P, S, K, X);
+	async Argon2Operation(p, T, m, time_cost, v, y, P, S, K = "", X = ""){
+		const H_0 = this.EstablishH_0(p, T, m, time_cost, v, y, P, S, K, X);
 		this.AllocateMemory(p, m);
-		this.p = p;
-		this.q = this.mm/this.p;
-		var segment_Length = this.q/4;
+		const q = this.mm / p;
+		var segment_Length = q / 4;
 
-		let B = new Array(this.p);
-		for(let i = 0; i < this.p; i++) B[i] = new Array(this.q);
+		let B = Array.from(Array(Number(p)), () => []);
 
-		for(let t = 0; t < time_cost; t++){
-			for(let segment = 0; segment < 4; segment++){
-				var handles = new Array(p);
-				for(let i = 0; i < p; i++) handles[i] = this._fill_segment(B, t, segment, i, y, segment_Length,this.H_0, this.q, p, this.mm, time_cost, v);
-				for(let i = 0; i < p; i++){
-					var new_blocks = handles[i];
-					for(let index = 0; index < segment_Length; index++) B[i][segment * segment_Length + index] = new_blocks[index];
+		if (window.Worker && window.runWorker) {
+			const workers = [];
+
+			await new Promise(resolve => {
+				let t = 0, segment = 0, completedTask = 0, result = [];
+
+				const runWorkers = () => {
+					workers.forEach((worker, i) => {
+						worker.postMessage({ type: 'fill-segment', payload: { B, t, segment, i: Number(i), y, segment_Length, H_0, q, p: Number(p), mm: this.mm, time_cost, v } });
+					});
+				};
+
+				const terminateWorkers = () => {
+					workers.forEach(worker => worker.terminate());
+				};
+
+				for (let i = 0; i < p; i++) {
+					workers[i] = new Worker(URL.createObjectURL(new Blob(["(" + runWorker.toString() + ")()"], { type: 'text/javascript' })));
+					workers[i].onmessage = function (e) {
+						const { i } = e.data.payload;
+						completedTask++;
+						for (let index = 0; index < segment_Length; index++) B[i][segment * segment_Length + index] = e.data.result[index];
+						if (completedTask >= p) {
+							completedTask = 0;
+							segment++;
+							if (segment >= 4) {
+								segment = 0;
+								t++;
+								if (t >= time_cost) {
+									terminateWorkers();
+									return resolve();
+								}
+							}
+							runWorkers();
+						}
+					};
+				}
+				runWorkers();
+			});
+		} else {
+			for (let t = 0; t < time_cost; t++) {
+				for (let segment = 0; segment < 4; segment++) {
+					var handles = await Promise.all(Array.from(Array(Number(p)), (_, i) => this._fill_segment(B, t, segment, i, y, segment_Length, H_0, q, p, this.mm, time_cost, v)));
+					for (let i = 0; i < p; i++) {
+						var new_blocks = handles[i];
+						for (let index = 0; index < segment_Length; index++) B[i][segment * segment_Length + index] = new_blocks[index];
+					}
 				}
 			}
 		}
 
 		let B_FINAL = this.ZERO(1024);
-		for(let index = 0; index < p; index++) B_FINAL = this.XOR(B_FINAL, B[index][this.q-1]);
+		for(let index = 0; index < p; index++) B_FINAL = this.XOR(B_FINAL, B[index][q-1]);
 		return this.variableLengthHashFunction(T, B_FINAL);
 	}
 
 	EstablishH_0(p, T, m, t, v, y, P, S, K = "", X = ""){
-		var A1 = this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(this.LE32(p), this.LE32(T)), this.LE32(m)), this.LE32(t)), this.LE32(v)), this.LE32(y));
-		var A2 = this.Concatenate(this.LE32(P.length), this.ascii(P));
-		var A3 = this.Concatenate(this.LE32(S.length), this.ascii(S));
-		var A4 = this.Concatenate(this.LE32(K.length), this.ascii(K));
-		let A5 = this.Concatenate(this.LE32(X.length), this.ascii(X));
-		var A = this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(A1, A2), A3), A4), A5);
+		var A = this.Concatenate(
+			this.LE32(p), this.LE32(T), this.LE32(m), this.LE32(t), this.LE32(v), this.LE32(y),
+			this.LE32(P.length), this.ascii(P),
+			this.LE32(S.length), this.ascii(S),
+			this.LE32(K.length), this.ascii(K),
+			this.LE32(X.length), this.ascii(X)
+		);
 
 		this.blake2bSetup(64);
 		new Blake2b().blake2bUpdate(this.context, A);
@@ -300,6 +361,16 @@ class Argon2id{
 	AllocateMemory(p, m){
 		let memory = 4 * p * Math.floor(m/(4*p));
 		this.mm = memory;
+	}
+
+	getHash(H_0, j, i) {
+		const key = 'hash' + H_0 + '_' + j + '_' + i;
+		if (Argon2id.memo[key]) {
+			return Argon2id.memo[key];
+		}
+		const result = this.variableLengthHashFunction(1024, this.Concatenate(H_0, this.LE32(j), this.LE32(i)));
+		Argon2id.memo[key] = result;
+		return result;
 	}
 
 	variableLengthHashFunction(T, A){
@@ -331,7 +402,21 @@ class Argon2id{
 		}
 	}
 
-	_fill_segment(B, t, segment, i, type_code, segment_length, H0, q, parallelism, m_prime, time_cost, version){
+	async getAddressBlock(t, i, segment, m_prime, time_cost, type_code, ctr) {
+		const key = `${t}_${i}_${segment}_${m_prime}_${time_cost}_${type_code}_${ctr}`;
+
+		if (Argon2id.memo[key]) {
+			return Argon2id.memo[key];
+		}
+
+		const A = this.Concatenate(this.LE64(t), this.LE64(i), this.LE64(segment), this.LE64(m_prime), this.LE64(time_cost), this.LE64(type_code), this.LE64(ctr), this.ZERO(968));
+		const address_block = await this.G(this.ZERO(1024), await this.G(this.ZERO(1024), A));
+		Argon2id.memo[key] = address_block;
+
+		return address_block;
+	}
+
+	async _fill_segment(B, t, segment, i, type_code, segment_length, H0, q, parallelism, m_prime, time_cost, version){
 		var data_independant = ((type_code == 1) || (type_code == 2 && t == 0 && segment <= 1));
 
 		if (data_independant){
@@ -340,8 +425,7 @@ class Argon2id{
 
 			while (pseudo_rands.length < segment_length){
 				ctr += 1;
-				var A = this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(this.Concatenate(this.LE64(t), this.LE64(i)), this.LE64(segment)), this.LE64(m_prime)), this.LE64(time_cost)), this.LE64(type_code)), this.LE64(ctr)), this.ZERO(968));
-				var address_block = this.G(this.ZERO(1024), this.G(this.ZERO(1024), A));
+				const address_block = await this.getAddressBlock(t, i, segment, m_prime, time_cost, type_code, ctr);
 				for(let addr_i = 0; addr_i < 1024; addr_i+=8) pseudo_rands.push([this.Uint8ArrayToBigInt(address_block.slice(addr_i,addr_i+4)), this.Uint8ArrayToBigInt(address_block.slice(addr_i+4,addr_i+8))])
 			}
 		}
@@ -349,7 +433,7 @@ class Argon2id{
 		for(let index = 0; index < segment_length; index++){
 			var j = segment * segment_length + index;
 			if(t == 0 && j < 2){
-				B[i][j] = this.variableLengthHashFunction(1024, this.Concatenate(this.H_0, this.LE32(j), this.LE32(i)));
+				B[i][j] = this.getHash(H0, j, i);
 				continue;
 			}
 
@@ -391,7 +475,7 @@ class Argon2id{
 			if(t != 0 && segment != 3) start_pos = (segment + 1) * segment_length;
 			var j_prime = this.MOD((BigInt(start_pos) + rel_pos), BigInt(q));
 
-			var new_block = this.G(B[i][this.MOD(j-1, q)], B[i_prime][j_prime]);
+			var new_block = await this.G(B[i][this.MOD(j-1, q)], B[i_prime][j_prime]);
 			if(t != 0 && version == 0x13) new_block = this.XOR(B[i][j], new_block);
 			B[i][j] = new_block;
 		}
@@ -401,7 +485,7 @@ class Argon2id{
 
 	hexToBase64(hexstring) {
 		return btoa(hexstring.match(/\w{2}/g).map(function(a) {
-  		return String.fromCharCode(parseInt(a, 16));
+			return String.fromCharCode(parseInt(a, 16));
 		}).join(""));
 	}
 
@@ -446,9 +530,9 @@ class Argon2id{
 		return salt.join("");
 	}
 
-	static hash(message, salt = Argon2id.randomSalt(), t=2, m=32, p=3, l=32, secret = "", associatedData = ""){
+	static async hash(message, salt = Argon2id.randomSalt(), t=2, m=32, p=3, l=32, secret = "", associatedData = ""){
 		let a2id = new Argon2id();
-		let output = a2id.Argon2Operation(p, l, m, t, 0x13, 2, message, salt, secret, associatedData);
+		let output = await a2id.Argon2Operation(p, l, m, t, 0x13, 2, message, salt, secret, associatedData);
 		return a2id.toHex(output);
 	}
 
@@ -459,9 +543,12 @@ class Argon2id{
 	}
 
 	static hashEncoded(message, salt = Argon2id.randomSalt(), t=2, m=32, p=3, l=32, secret = "", associatedData = ""){
-		let a2id = new Argon2id();
-		let output = a2id.Argon2Operation(p, l, m, t, 0x13, 2, message, salt, secret, associatedData);
-		return "$argon2id$v=19$m="+m+",t="+t+",p="+p+"$"+btoa(salt).replaceAll("=", "")+"$"+a2id.hexToBase64(a2id.toHex(output)).replaceAll("=", "");
+		return new Promise(resolve => {
+			let a2id = new Argon2id();
+			a2id.Argon2Operation(p, l, m, t, 0x13, 2, message, salt, secret, associatedData).then(output => {
+				resolve("$argon2id$v=19$m="+m+",t="+t+",p="+p+"$"+btoa(salt).replaceAll("=", "")+"$"+a2id.hexToBase64(a2id.toHex(output)).replaceAll("=", ""));
+			});
+		});
 	}
 
 	static verify(hashEncoded, message, secret = "", associatedData = ""){
@@ -479,8 +566,10 @@ class Argon2id{
 		let salt = atob(hea[4]);
 		let digest = Argon2id.hashDecode(hashEncoded);
 
-		let hash = Argon2id.hash(message, salt, t, m, p, digest.length/2, secret, associatedData);
-		if(digest == hash) return true;
-		return false;
+		return new Promise(resolve => {
+			Argon2id.hash(message, salt, t, m, p, digest.length/2, secret, associatedData).then(hash => {
+				resolve(digest == hash);
+			});
+		});
 	}
 }

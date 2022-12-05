@@ -27,25 +27,25 @@ Argon2id implementation in a plain JavaScript.
 
 // Generate hash from the provided message
 // If you don't provide salt, it will be auto generated
-Argon2id.hash("message");
+await Argon2id.hash("message");
 
 // Generate Encoded hash from the provided message
 // Both hash and hashEncoded functions accept the same parameters
-Argon2id.hashEncoded("message");
+await Argon2id.hashEncoded("message");
 // To get hash from hashEncoded function you can use function called hashDecode
 Argon2id.hashDecode("$argon2id$v=19$m=32,t=3,p=3$dGVzdHRlc3R0ZXN0dGVzdA$YJjtURjUHWPGnu+B5BTdfpebyJlWEfzfbBdkO7SLquM");
 
 // Generate hash from the provided message and salt
-Argon2id.hash("message", "salt");
+await Argon2id.hash("message", "salt");
 // To generate random secure salt use randomSalt function
-Argon2id.hashEncoded("message", Argon2id.randomSalt());
+await Argon2id.hashEncoded("message", Argon2id.randomSalt());
 
 // Generate hash from the provided message, salt, iterations, memory cost, parallelism factor and hash length
-Argon2id.hashEncoded("message", Argon2id.randomSalt(), 2, 32, 3, 32);
+await Argon2id.hashEncoded("message", Argon2id.randomSalt(), 2, 32, 3, 32);
 // This library also support Secret and Associated Data
-Argon2id.hashEncoded("message", Argon2id.randomSalt(), 2, 32, 3, 32, "Secret", "Associated Data");
+await Argon2id.hashEncoded("message", Argon2id.randomSalt(), 2, 32, 3, 32, "Secret", "Associated Data");
 
 // To validate the message you can use verify function.
 // This function accept hashEncoded, message, secret and associated data.
-Argon2id.verify("$argon2id$v=19$m=32,t=2,p=3$dW9UeUphNWNOMzRBMGtYMw$Cxao0qDvUJFAasxuFpojONVbdi6Est3RyyRBtyHRfrI", "test");
+await Argon2id.verify("$argon2id$v=19$m=32,t=2,p=3$dW9UeUphNWNOMzRBMGtYMw$Cxao0qDvUJFAasxuFpojONVbdi6Est3RyyRBtyHRfrI", "test");
 ```
