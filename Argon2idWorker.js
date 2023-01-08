@@ -1,7 +1,7 @@
 /*
-Argon2id-JS v1.1.0
+Argon2id-JS v1.1.1
 https://github.com/Rabbit-Company/Argon2id-JS
-License: GPL-3.0
+License: MIT
 */
 
 function runWorker() {
